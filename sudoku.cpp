@@ -170,14 +170,13 @@ class Sudoku {
                         validInput = true;  // Mark input as valid
 
                     } else {
-                        Beep(800, 1000);
+                        cout << "\a";  // Rings the system bell (if enabled)
                         cout << "INVALID MOVE!" << endl;
                     }
                 }
 
                 else {
-                    Beep(500, 800);  // 523 hertz (C5) for 500 milliseconds
-                                     // cin.get();
+                   cout << "\a";  // Rings the system bell (if enabled)
                     cout << "INVALID MOVE POSITION OCCUPIED!" << endl;
                 }
             }
