@@ -16,7 +16,6 @@ This is a simple console-based Sudoku game implemented in C++. The program gener
 
 ## Requirements
 - A C++ compiler (e.g., g++, MinGW, MSVC)
-- Windows OS (for `Beep()` function, which may not work on other OS)
 
 ## How to Compile and Run
 1. Open a terminal or command prompt.
