@@ -1,7 +1,4 @@
-#include <dos.h>
 #include <unistd.h>
-#include <windows.h>  // for  beep sound
-
 #include <cstdlib>  // for using rand and srand functions
 #include <ctime>    // for using time function
 #include <iomanip>
@@ -28,6 +25,7 @@ class Sudoku {
     stack<Move> newmove;
 
     char arr[9][9];
+    char dummy[9][9];
 
     pair<int, int> translate(int num) {
         return make_pair((num - 1) / 9, (num - 1) % 9);
@@ -36,10 +34,9 @@ class Sudoku {
     //------------------For checking that the move is valid or
     //not---------------------
 
-    bool is_valid_move(int num, pair<int, int> p) {
+    bool is_valid_move(char num, pair<int, int> p) {
         int row = p.first;
         int col = p.second;
-
         // Check if the cell is already occupied
         if (arr[row][col] != ' ') {
             return false;
@@ -68,7 +65,36 @@ class Sudoku {
 
     //-------------------Sudoku
     //Solver--------------------------------------------------
+    bool solver()
+    {
+        display_boarddummy();
+        for(int i=0;i<9;i++)
+        {
+            for(int j=0;j<9;j++)
+            {
+                if(dummy[i][j]==' ')
+                {
+                    for(char num='1';num<='9';num++)
+                    {
+                        if(is_valid_move(num,{i,j}))
+                            {
+                                dummy[i][j]=num;
+                                if(solver())
+                                {
+                                    return true;
 
+                                }
+                                else{
+                                    dummy[i][j]=' ';
+                                }
+                            }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     //---------------------Function for displaying clock and
     //timer----------------------------------------
    public:
@@ -113,6 +139,8 @@ class Sudoku {
     //------------------------------------------To input new values in the board
     //by the user-------------------------------
     void play() {
+
+
     h:
         while (!isboard_full()) {
             // Clear the screen
@@ -170,13 +198,13 @@ class Sudoku {
                         validInput = true;  // Mark input as valid
 
                     } else {
-                        cout << "\a";  // Rings the system bell (if enabled)
-                        cout << "INVALID MOVE!" << endl;
+                       system("echo \a");  // Triggers a beep
+                       cout << "INVALID MOVE!" << endl;
                     }
                 }
 
                 else {
-                   cout << "\a";  // Rings the system bell (if enabled)
+                    cout << "\a";  // Rings the system bell (if enabled)
                     cout << "INVALID MOVE POSITION OCCUPIED!" << endl;
                 }
             }
@@ -215,11 +243,37 @@ class Sudoku {
 
         cout << '-' << endl;
     }
+    void display_boarddummy() {
+        for (int i = 0; i < 9; ++i) {
+            for (int j = 0; j < 9; ++j) cout << "- - ";
+
+            cout << '-' << endl;
+
+            for (int k = 0; k < 10; ++k) {
+                if (k == 9)
+                    cout << "|";
+                else
+                    cout << "| " << dummy[i][k] << ' ';
+            }
+
+            cout << endl;
+        }
+
+        for (int i = 0; i < 9; ++i) cout << "- - ";
+
+        cout << '-' << endl;
+    }
     //-------------------------For generating the board according to the needed
     //difficulty------------------------------------
 
     void generate_board(int difficulty) {
-        srand(time(NULL));
+        for(int i=0;i<9;i++)
+        {
+            for(int j=0;j<9;j++)
+            {
+                arr[i][j]=' ';
+            }
+        }
         unordered_set<int> positions;
 
         int numCells;
@@ -242,15 +296,32 @@ class Sudoku {
             int pos = 1 + (rand() % 81);
             positions.insert(pos);
         }
-
-        for (int pos : positions) {
+      for (int pos : positions) {
             pair<int, int> p = translate(pos);
-            int num = '1' + (rand() % 9);
-            while (!is_valid_move(num, p)) {
+            char num = '1' + (rand() % 9);
+            int attempts = 0;
+            while (!is_valid_move(num, p) && attempts < 100) {
                 num = '1' + (rand() % 9);
+                attempts++;
             }
-            arr[p.first][p.second] = num;
+            if (attempts < 100)
+                arr[p.first][p.second] = num;
         }
+
+        for(int i=0; i<9; i++){
+            for(int j=0; j<9; j++){
+                dummy[i][j]=arr[i][j];
+                cout<<dummy[i][j]<<" ";
+            }
+            cout<<endl;
+        }
+        cout<<"\n\n\n\n\n\n";
+        if(!solver())
+        {
+             generate_board(difficulty);
+        }
+
+
     }
     //--------------------For doing undo of last
     //move----------------------------------------------
@@ -284,7 +355,7 @@ int main() {
     // Start the timer in a separate thread
     thread timerThread(&Sudoku::timer, &g1);
     sleep(1);
-
+    srand(time(NULL));
     g1.initialize();
     cout << "------------------------------------------------WELCOME TO "
             "SUDOKU----------------------------------------------------"
